@@ -7,6 +7,7 @@ const swaggerUi = require('swagger-ui-express');
 const cors = require('cors');
 const { body, param, validationResult } = require('express-validator');
 
+
 app.use(express.json());
 
 /**
@@ -84,7 +85,7 @@ const validateCompany = [
   body('companyId')
     .exists()
     .withMessage('CompanyId is required and cannot be empty')
-    .notEmpty().trim().escape(), body('companyId').exists().withMessage('companyId is missing').trim().escape(), body('companyName').exists().withMessage('comapnyName is missing').trim().escape(), body('companyCity').exists().withMessage('companyCity is missing').trim().escape()];
+    .notEmpty().trim().escape(), body('companyId').exists().withMessage('companyId is missing').trim().escape(), body('companyName').exists().withMessage('companyName is missing').trim().escape(), body('companyCity').exists().withMessage('companyCity is missing').trim().escape()];
 
 const validateCompanyPatch = [
   body('companyName')
@@ -108,6 +109,7 @@ const validateCompanyIdParam = [param('id').exists().withMessage('Company Id is 
  */
 app.get('/company', async (req, res) => {
   try {
+
     const result = await pool.query("select * from company");
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(result);
@@ -230,7 +232,6 @@ app.post('/company', validateCompany, async (req, res) => {
   }
 });
 
-
 /**
  * @swagger
  * /agents/{code}:
@@ -295,8 +296,6 @@ app.patch('/company/:id', validateCompanyIdParam, validateCompanyPatch, async (r
   }
 });
 
-
-
 /**
 * @swagger
 * /company/{id}:
@@ -347,8 +346,6 @@ app.delete('/company/:id', validateCompanyIdParam, async (req, res) => {
   }
 });
 
-
-
 /**
  * @swagger
  * /customers:
@@ -397,6 +394,35 @@ app.get('/orders', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /company:
+ *     get:
+ *       description: return all companies
+ *     produces:
+ *          - application/json
+ *     responses:
+ *          200:
+ *              description: object comapny containing an array of company details
+ */
+app.get('/say', async (req, res) => {
+  try {
+    const axios = require('axios');
+
+    let response = await axios.get('https://b9llx4z1o8.execute-api.us-east-2.amazonaws.com/qa/getresponse?keyword=' + req.query.keyword);
+    let data = response.data;
+
+    console.log(data)
+    console.log(req.query.keyword)
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(data);
+    
+  } catch (err) {
+    const errResponse = { result: 'failed', message: 'Error speaking' };
+    res.status(500).json(errResponse);
+  }
+});
+
 app.use(function (req, res) {
   res.status(404).send('Error! 404 request not found!');
 });
@@ -404,3 +430,4 @@ app.use(function (req, res) {
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
 });
+
